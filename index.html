@@ -9,27 +9,53 @@
 <body>
     <div id="container"></div>
     <script type="module">
-        import { render } from './src/index.js'
-
-        const vnode = {
-            tag: 'div'
-        }
-
-        class MyComponent {
-            render () {
-                return {
-                    tag: 'h1'
-                }
-            }
-        }
-
-        const component = {
-            tag: MyComponent
-        }
+        import { h, Fragment, Portal } from './src/h.js'
+        import { Component } from './src/component.js'
+        import { render } from './src/render.js'
 
 
-        render(vnode, document.querySelector('#container'))
-        render(component, document.querySelector('#container'))
+
+
+        // render(vnode, document.querySelector('#container'))
+        // render(component, document.querySelector('#container'))
+
+        const v = h('div', null, h('span'))
+        console.log(v)
+
+        const text = h('div', null, '我是文本')
+        console.log(text)
+
+        const fragment = h(Fragment, null, [h('h1'), h('h1')])
+        console.log(fragment)
+
+        const portal = h(Portal, { target: '#box' }, h('h1'))
+        console.log(portal)
+
+        const MyFunctionalComponent = () => {}
+        const functional = h(MyFunctionalComponent, null, h('div'))
+        console.log(functional)
+
+        class MyStatefulComponent extends Component {}
+        const statefulComponent = h(MyStatefulComponent, null, h('div'))
+        console.log(statefulComponent)
+
+        class NoneStateful {}
+        const noneStateful = h(NoneStateful, null, h('div'))
+        console.log(noneStateful)
+
+        const dynamicClass = ['class-c', 'class-d']
+        const div = h('div', {
+            style: {
+                width: '100px',
+                height: '100px',
+                backgroundColor: '#f00'
+            },
+            class: ['class-a', 'class-b', dynamicClass]
+        }, [
+            h('div', { style: { width: '10px', height: '10px', backgroundColor: 'green'} }),
+            h('div', { style: { width: '20px', height: '20px', backgroundColor: 'yellow'} })
+        ])
+        render(div, document.querySelector('#container'))
     </script>
 </body>
 </html>
