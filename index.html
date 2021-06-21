@@ -14,48 +14,152 @@
         import { render } from './src/render.js'
 
 
+        // const v = h('div', null, h('span'))
+        // console.log(v)
+
+        // const text = h('div', null, '我是文本')
+        // console.log(text)
+
+        // const fragment = h(Fragment, null, [h('h1'), h('h1')])
+        // console.log(fragment)
+
+        // const portal = h(Portal, { target: '#box' }, h('h1'))
+        // console.log(portal)
+
+        // const MyFunctionalComponent = () => {}
+        // const functional = h(MyFunctionalComponent, null, h('div'))
+        // console.log(functional)
+
+        // class MyStatefulComponent extends Component {}
+        // const statefulComponent = h(MyStatefulComponent, null, h('div'))
+        // console.log(statefulComponent)
+
+        // class NoneStateful {}
+        // const noneStateful = h(NoneStateful, null, h('div'))
+        // console.log(noneStateful)
+
+        // const dynamicClass = ['class-c', 'class-d']
+        // const div = h('div', {
+        //     style: {
+        //         width: '100px',
+        //         height: '100px',
+        //         backgroundColor: '#f00'
+        //     },
+        //     class: ['class-a', 'class-b', dynamicClass]
+        // }, [
+        //     h('div', { style: { width: '10px', height: '10px', backgroundColor: 'green'} }),
+        //     h('div', { style: { width: '20px', height: '20px', backgroundColor: 'yellow'} })
+        // ])
+        // render(div, document.querySelector('#container'))
+
+        // // 验证 Attr
+        // const input = h('input', {
+        //     type: 'checkbox',
+        //     checked: true,
+        //     custom: '1'
+        // }, null)
+        // console.log(input)
+        // render(input, document.querySelector('#container'))
 
 
-        // render(vnode, document.querySelector('#container'))
-        // render(component, document.querySelector('#container'))
+        // // 验证event
+        // const div = h('div', {
+        //     style: {
+        //         width: '100px',
+        //         height: '100px',
+        //         backgroundColor: 'red'
+        //     },
+        //     onclick: () => {
+        //         alert(123)
+        //     }
+        // })
+        // render(div, document.querySelector('#container'))
 
-        const v = h('div', null, h('span'))
-        console.log(v)
+        // Text
+        // const text = h('div', null, '我是文本')
+        // console.log(text)
+        // render(text, document.querySelector('#container'))
 
-        const text = h('div', null, '我是文本')
-        console.log(text)
+        // Fragemnt
+        // const fragment = h(Fragment, null, [
+        //     h('span', null, '文本1'),
+        //     h('span', null, '文本2')
+        // ])
+        // render(fragment, document.querySelector('#container'))
 
-        const fragment = h(Fragment, null, [h('h1'), h('h1')])
-        console.log(fragment)
+        // Portal
+        // const portal = h(Portal, {
+        //     target: 'body'
+        // }, [
+        //     h('span', null, '文本3'),
+        //     h('span', null, '文本4')
+        // ])
+        // render(portal, document.querySelector('#container'))
 
-        const portal = h(Portal, { target: '#box' }, h('h1'))
-        console.log(portal)
+        // Component
+        // class MyComponent {
+        //     render () {
+        //         return h('div', {
+        //             style: {
+        //                 width: '100px',
+        //                 height: '100px',
+        //                 backgroundColor: 'green'
+        //             }
+        //         }, [
+        //             h('span', null, '我是组件文字1'),
+        //             h('span', null, '我是组件文字2')
+        //         ])
+        //     }
+        // }
+        // const comp = h(MyComponent)
+        // console.log(comp)
+        // render(comp, document.querySelector('#container'))
 
-        const MyFunctionalComponent = () => {}
-        const functional = h(MyFunctionalComponent, null, h('div'))
-        console.log(functional)
 
-        class MyStatefulComponent extends Component {}
-        const statefulComponent = h(MyStatefulComponent, null, h('div'))
-        console.log(statefulComponent)
+        // functional Component
+        // const MyFunctionComponent = () => {
+        //     return h('div', null, [
+        //         h('span', null, '函数式组件')
+        //     ])
+        // }
+        // const f = h(MyFunctionComponent)
+        // console.log(f)
+        // render(f, document.querySelector('#container'))
 
-        class NoneStateful {}
-        const noneStateful = h(NoneStateful, null, h('div'))
-        console.log(noneStateful)
+        // patch replaceNode
+        // const prevVNode = h('div', null, h('span', null, '我是前一个组件'))
+        // class MyComponent {
+        //     render () {
+        //         return h('div', null, [
+        //             h('span', null, '我是后一个组件')
+        //         ])
+        //     }
+        // }
+        // const nextVNode = h(MyComponent)
 
-        const dynamicClass = ['class-c', 'class-d']
-        const div = h('div', {
+        // render(prevVNode, document.querySelector('#container'))
+        // render(nextVNode, document.querySelector('#container'))
+
+        // patch style
+        const prevVNode = h('div', {
             style: {
                 width: '100px',
                 height: '100px',
-                backgroundColor: '#f00'
-            },
-            class: ['class-a', 'class-b', dynamicClass]
-        }, [
-            h('div', { style: { width: '10px', height: '10px', backgroundColor: 'green'} }),
-            h('div', { style: { width: '20px', height: '20px', backgroundColor: 'yellow'} })
-        ])
-        render(div, document.querySelector('#container'))
+                backgroundColor: 'black'
+            }
+        }, null)
+
+        const nextVNode = h('div', {
+            style: {
+                width: '200px',
+                height: '200px',
+                border: '2px solid #f00'
+
+            }
+        })
+
+        render(prevVNode, document.querySelector('#container'))
+        render(nextVNode, document.querySelector('#container'))
     </script>
 </body>
 </html>

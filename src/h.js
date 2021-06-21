@@ -22,7 +22,7 @@ const normalizeVNodes = children => {
     })
 }
 
-const createTextNode = text => {
+export const createTextVNode = text => {
     return {
         _isVNode: true,
         flags: VNodeFlags.TEXT,
@@ -107,12 +107,9 @@ export const h = (tag, data = null, children = null) => {
         childFlags = ChildrenFlags.SINGLE_VNODE
     } else {
         // 其他情况都作为文本节点处理，即单个子节点，会调用createTextNode 创建纯文本类型的 VNode
-        childFlags = ChildrenFlags.TEXT
-        children = createTextNode(children + '')
+        childFlags = ChildrenFlags.SINGLE_VNODE
+        children = createTextVNode(children + '')
     }
-
-
-
 
     return {
         _isVNode: true,
