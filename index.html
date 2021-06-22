@@ -13,6 +13,7 @@
         import { Component } from './src/component.js'
         import { render } from './src/render.js'
 
+        const container = document.querySelector('#container')
 
         // const v = h('div', null, h('span'))
         // console.log(v)
@@ -141,27 +142,125 @@
         // render(nextVNode, document.querySelector('#container'))
 
         // patch style
-        const prevVNode = h('div', {
-            style: {
-                width: '100px',
-                height: '100px',
-                backgroundColor: 'black'
-            }
-        }, null)
+        // const prevVNode = h('div', {
+        //     style: {
+        //         width: '100px',
+        //         height: '100px',
+        //         backgroundColor: 'black'
+        //     },
+        //     custom1: '123'
+        // }, null)
 
-        const nextVNode = h('div', {
-            style: {
-                width: '200px',
-                height: '200px',
-                border: '2px solid #f00'
+        // const nextVNode = h('div', {
+        //     style: {
+        //         width: '200px',
+        //         height: '200px',
+        //         border: '2px solid #f00'
+        //     },
+        //     custom2: '456'
+        // })
 
-            }
-        })
+        // render(prevVNode, document.querySelector('#container'))
+        // render(nextVNode, document.querySelector('#container'))
 
-        console.log('test')
+        // patch children
+        // const prevVNode = h('div', null, h(Fragment, null, [
+        //     h('p', {
+        //         style: {
+        //             width: '100px',
+        //             height: '100px',
+        //             background: 'red'
+        //         }
+        //     }),
+        //     h('p', {
+        //         style: {
+        //             width: '100px',
+        //             height: '100px',
+        //             background: 'red'
+        //         }
+        //     })
+        // ]))
 
-        render(prevVNode, document.querySelector('#container'))
-        render(nextVNode, document.querySelector('#container'))
+        // const nextVNode = h('div')
+
+        // console.log(prevVNode, nextVNode)
+
+        // render(prevVNode, document.querySelector('#container'))
+        // setTimeout(() => {
+        //     render(nextVNode, document.querySelector('#container'))
+        // }, 2000)
+
+        // patch children
+        // const prevVNode = h('div', null, [
+        //     h('p', {
+        //         style: {
+        //             width: '100px',
+        //             height: '100px',
+        //             backgroundColor: 'yellow'
+        //         }
+        //     }),
+        //     h('p', {
+        //         style: {
+        //             width: '100px',
+        //             height: '100px',
+        //             backgroundColor: 'black'
+        //         }
+        //     }),
+        // ])
+
+        // const nextVNode = h('div', null, [
+        //     h('p', {
+        //             style: {
+        //                 width: '100px',
+        //                 height: '100px',
+        //                 backgroundColor: 'red'
+        //             }
+        //     }),
+
+        //     h('p', {
+        //         style: {
+        //             width: '100px',
+        //             height: '100px',
+        //             backgroundColor: 'green'
+        //         }
+        // })
+        // ])
+
+        // render(prevVNode, container)
+        // setTimeout(() => {
+        //     render(nextVNode, container)
+        // }, 2000)
+
+
+        // patch fragment
+        const prev = h(Fragment, null, [
+            h('div', null , '片段1'),
+            h('div', null , '片段2'),
+            h('div', null , '片段3')
+        ])
+
+        const next = h(Fragment, null, [
+            h('div', null , '片段4'),
+            h('div', null , '片段5'),
+            h('div', null , '片段6')
+        ])
+        render(prev, container)
+
+        setTimeout(() => {
+            render(next, container)
+        }, 2000)
+
+
+        // // patch text
+        // const prev = h('div', null, '旧文本')
+        // const next = h('div', null, '旧文本')
+
+        // render(prev, container)
+
+        // setTimeout(() => {
+        //     render(next, container)
+        // }, 2000)
+
     </script>
 </body>
 </html>

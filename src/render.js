@@ -1,13 +1,8 @@
 import { VNodeFlags, ChildrenFlags } from "./flags.js"
 import { createTextVNode } from './h.js'
-import { patch } from './patch.js'
+import { patch, patchData } from './patch.js'
 
-// todo
-export const patchData = (el, key, prevData, nextData) => {
 
-}
-
-const domPropsRE = /\[A-Z]^(?:value|checked|selected|muted)$/
 const mountElement = (vnode, container, isSVG) => {
 
     isSVG = isSVG || vnode.flags & VNodeFlags.ELEMENT_SVG
@@ -19,30 +14,7 @@ const mountElement = (vnode, container, isSVG) => {
     const data = vnode.data
     if (data) {
         for(let key in data) {
-            // key可能是 style 、 class 、on 等等
-            switch(key){
-                case 'style':
-                    for (let k in data.style) {
-                        el.style[k] = data.style[k]
-                    }
-                    break;
-                case 'class':
-                    el.className = data[key]
-                    break;
-
-                default:
-                    if (key.startsWith('on')) {
-                        // 事件
-                        el.addEventListener(key.slice(2), data[key])
-                    } else if (domPropsRE.test(key)) {
-                        // 当做dom prop处理
-                        el[key] = data[key]
-                    } else {
-                        // 当做 Attr 处理
-                        el.setAttribute(key, data[key])
-                    }
-                    break
-            }
+            patchData(el, key, null, data[key])
         }
     }
 
@@ -156,7 +128,6 @@ export const mount = (vnode, container, isSVG) => {
         // 挂载普通元素
         mountElement(vnode, container, isSVG)
     } else if (flags & VNodeFlags.COMPONENT) {
-
         // 挂载组件
         mountComponent(vnode, container, isSVG)
     } else if (flags & VNodeFlags.TEXT) {
