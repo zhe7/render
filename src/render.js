@@ -1,10 +1,10 @@
 import { VNodeFlags, ChildrenFlags } from "./flags.js"
 import { createTextVNode } from './h.js'
-import { patch, patchData } from './patch.js'
+import { patch, patchData, getElement } from './patch.js'
 
 
 const mountElement = (vnode, container, isSVG) => {
-
+    container = getElement(container)
     isSVG = isSVG || vnode.flags & VNodeFlags.ELEMENT_SVG
     const el = isSVG
         ? document.createElementNS('http://www.w3.org/2000/svg', vnode.tag)
@@ -38,24 +38,75 @@ const mountElement = (vnode, container, isSVG) => {
 
 // 有状态组件
 const mountStatefulComponent = (vnode, container, isSVG) => {
-    console.log('mount stateful')
     // 创建组件实例
-    const instance = new vnode.tag()
-    //渲染vnode
-    instance.$vnode = instance.render()
-    // 挂载
-    mount(instance.$vnode, container, isSVG)
-    // el 和 组件的$el 都引用组件的根dom元素
-    instance.$el = vnode.el = instance.$vnode.el
+    const instance = (vnode.children = new vnode.tag())
+    // 初始化props
+    instance.$props = vnode.data
+
+    instance._update = () => {
+        if (instance._mounted) {
+            // 1.拿到旧的vnode
+            const prevVNode = instance.$vnode
+            // 2.拿到新的vnode
+            const nextVNode = (instance.$vnode = instance.render())
+            // 3.patch更新
+            patch(prevVNode, nextVNode, prevVNode.el.parentNode)
+            // 4.更新vnode.el 和 $el
+            instance.$el = vnode.el = instance.$vnode.el
+        } else {
+            // 1.渲染vnode
+            instance.$vnode = instance.render()
+            // 2.挂载
+            mount(instance.$vnode, container, isSVG)
+            // 3.标记已挂载标识
+            instance._mounted = true
+            // 4.el 和 组件的$el 都引用组件的根dom元素
+            instance.$el = vnode.el = instance.$vnode.el
+            // 5.调用mounted生命周期
+            instance.mounted && instance.mounted()
+        }
+
+    }
+
+    instance._update()
 }
 
 // 函数式组件
 const mountFunctionalComponent = (vnode, container, isSVG) => {
-    const $vnode = vnode.tag()
+    vnode.handle = {
+        prev: null,
+        next: vnode,
+        container,
+        update: () => {
+            if (vnode.handle.prev) {
+                // 更新
+                const prevVNode = vnode.handle.prev
+                const nextVNode = vnode.handle.next
 
-    mount($vnode, container ,isSVG)
+                const prevTree = prevVNode.children
+                // 更新props数据
+                const props = nextVNode.data
+                const nextTree = nextVNode.children = nextVNode.tag(props)
 
-    vnode.el = $vnode.el
+                //调用patch
+                patch(prevTree, nextTree, vnode.handle.container)
+
+            } else {
+                // 获取props
+                const props = vnode.data
+                const $vnode = (vnode.children = vnode.tag(props))
+                console.log(vnode, $vnode)
+
+                mount($vnode, container ,isSVG)
+
+                vnode.el = $vnode.el
+            }
+
+        }
+    }
+
+    // 立即调用完成初次挂载
+    vnode.handle.update()
 }
 
 // 组件挂载，分为有状态组件和函数式组件
@@ -124,6 +175,7 @@ const mountPortal = (vnode, container) => {
 
 export const mount = (vnode, container, isSVG) => {
     const { flags } = vnode
+    container = getElement(container)
     if (flags & VNodeFlags.ELEMENT) {
         // 挂载普通元素
         mountElement(vnode, container, isSVG)

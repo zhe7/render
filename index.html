@@ -8,6 +8,7 @@
 </head>
 <body>
     <div id="container"></div>
+    <div id="container2"></div>
     <script type="module">
         import { h, Fragment, Portal } from './src/h.js'
         import { Component } from './src/component.js'
@@ -233,22 +234,22 @@
 
 
         // patch fragment
-        const prev = h(Fragment, null, [
-            h('div', null , '片段1'),
-            h('div', null , '片段2'),
-            h('div', null , '片段3')
-        ])
+        // const prev = h(Fragment, null, [
+        //     h('div', null , '片段1'),
+        //     h('div', null , '片段2'),
+        //     h('div', null , '片段3')
+        // ])
 
-        const next = h(Fragment, null, [
-            h('div', null , '片段4'),
-            h('div', null , '片段5'),
-            h('div', null , '片段6')
-        ])
-        render(prev, container)
+        // const next = h(Fragment, null, [
+        //     h('div', null , '片段4'),
+        //     h('div', null , '片段5'),
+        //     h('div', null , '片段6')
+        // ])
+        // render(prev, container)
 
-        setTimeout(() => {
-            render(next, container)
-        }, 2000)
+        // setTimeout(() => {
+        //     render(next, container)
+        // }, 2000)
 
 
         // // patch text
@@ -261,6 +262,132 @@
         //     render(next, container)
         // }, 2000)
 
+        // patch portal
+        // const prev = h(Portal, {
+        //     target: '#container'
+        // }, [
+        //     h('span', null, 123)
+        // ])
+
+        // const next = h(Portal, {
+        //     target: '#container'
+        // }, [
+        //     h(Portal, {
+        //         target: '#container'
+        //     }, h('span', null, 456)),
+        //     h('span', null, 789)
+        // ])
+
+        // render(prev, document.body)
+        // setTimeout(() => {
+        //     render(next, document.body)
+        // }, 2000)
+
+
+        // patch Component
+        // class MyComponent {
+        //     state = 'one'
+
+        //     mounted () {
+        //         setTimeout(() => {
+        //             this.state = 'two'
+        //             this._update()
+        //         }, 2000)
+        //     }
+
+        //     render () {
+        //         return h('div', null, this.state)
+        //     }
+        // }
+
+        // const vn = h(MyComponent)
+        // render(vn, container)
+
+        // class ChildComponent {
+        //     render () {
+        //         return h('div', null, this.$props.text)
+        //     }
+        // }
+
+        // class Parent {
+        //     state = 'one'
+
+        //     mounted () {
+        //         setTimeout(() => {
+        //             this.state = 'two'
+        //             this._update()
+        //         }, 2000)
+        //     }
+
+        //     render () {
+        //         return h(ChildComponent, {
+        //             // 父组件向子组件传递props
+        //             text: this.state
+        //         })
+        //     }
+        // }
+
+        // const vnode = h(Parent)
+
+        // render(vnode, container)
+
+        // 不同子组件的组件类型更新
+        // class ChildComponent1 {
+        //     unmounted () {
+        //         console.log('触发了 unmounted')
+        //     }
+
+        //     render () {
+        //         return h('div', null, 123)
+        //     }
+        // }
+
+        // class ChildComponent2 {
+        //     render () {
+        //         return h('div', null, 456)
+        //     }
+        // }
+
+        // class Parent {
+        //     isTrue = true
+
+        //     mounted () {
+        //         setTimeout(() => {
+        //             this.isTrue = false
+        //             this._update()
+        //         }, 2000)
+        //     }
+
+        //     render () {
+        //         return this.isTrue ? h(ChildComponent1) : h(ChildComponent2)
+        //     }
+        // }
+
+        // render(h(Parent), container)
+
+        // 函数式组件
+        const MyFunctionalComponent = props => {
+            return h('div', null, props.text)
+        }
+
+        class Parent {
+            text = 13
+
+            mounted () {
+                setTimeout(() => {
+                    this.text = 14
+                    this._update()
+                }, 2000)
+            }
+
+            render () {
+                return h(MyFunctionalComponent, {
+                    text:  this.text
+                })
+            }
+        }
+
+        render(h(Parent), container)
     </script>
 </body>
 </html>

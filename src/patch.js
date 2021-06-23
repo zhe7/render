@@ -43,8 +43,15 @@ export const patchData = (el, key, prevValue, nextValue) => {
     }
 }
 
+export const getElement = container =>
+    typeof container === 'string'
+    ? document.querySelector(container)
+    : container
+
 const removeVNode = (VNode, container) => {
     const { flags, children } = VNode
+    container = getElement(container)
+
     if (flags & VNodeFlags.FRAGMENT) {
         children.forEach(item => {
             container.removeChild(item.el)
@@ -55,7 +62,7 @@ const removeVNode = (VNode, container) => {
 }
 
 const patchChildren = (prevChildFlags, nextChildFlags, prevChildren, nextChildren, container) => {
-    console.log(prevChildFlags,nextChildFlags )
+    console.log(container)
     switch(prevChildFlags) {
         // 旧的子节点，是单个子节点
         case ChildrenFlags.SINGLE_VNODE:
@@ -129,8 +136,15 @@ const patchChildren = (prevChildFlags, nextChildFlags, prevChildren, nextChildre
 const repalceVNode = (prevVNode, nextVNode, container) => {
     // container.removeChild(prevVNode.el)
     removeVNode(prevVNode, container)
+
+    //如果被移除的vnode是组件类型，则需要调用改组件实例的unmounted钩子函数
+    if (prevVNode.flags & VNodeFlags.COMPONENT_STATEFUL_NORMAL) {
+        const instance = prevVNode.children
+        instance.unmounted && instance.unmounted()
+    }
+
     mount(nextVNode, container)
-    console.log(container.vnode)
+
 }
 
 const patchElement = (prevVNode, nextVNode, container) => {
@@ -176,7 +190,29 @@ const patchElement = (prevVNode, nextVNode, container) => {
 }
 
 const patchComponent = (prevVNode, nextVNode, container) => {
+    console.log(prevVNode, nextVNode)
 
+    // tag属性指向组件类，通过对比判定是否为相同的组件
+    if (nextVNode.tag !== prevVNode.tag) {
+        repalceVNode(prevVNode, nextVNode, container)
+    }else if (nextVNode.flags & VNodeFlags.COMPONENT_STATEFUL_NORMAL) {
+        // 1.获取组件实例
+        const instance = nextVNode.children = prevVNode.children
+        // 2.更新props
+        instance.$props = nextVNode.data
+        // 3.更新组件
+        instance._update()
+    } else {
+        // 函数式组件的更新
+        // 通过prevVNode 拿到handle对象
+        const handle = nextVNode.handle = prevVNode.handle
+        // 更新handle对象
+        handle.prev = prevVNode
+        handle.next = nextVNode
+        handle.container = container
+
+        handle.update()
+    }
 }
 
 const patchText = (prevVNode, nextVNode, container) => {
@@ -208,8 +244,34 @@ const patchFragment = (prevVNode, nextVNode, container) => {
     }
 }
 
-const patchPortal = (prevVNode, nextVNode, container) => {
+const patchPortal = (prevVNode, nextVNode) => {
+    patchChildren(
+        prevVNode.childFlags,
+        nextVNode.childFlags,
+        prevVNode.children,
+        nextVNode.children,
+        prevVNode.tag
+    )
 
+    nextVNode.el = prevVNode.el
+
+    // 如果新旧container不同，需要搬运
+    if (nextVNode.tag !== prevVNode.tag) {
+        const container = getElement(nextVNode.tag)
+
+        switch(nextVNode.childFlags) {
+            case ChildrenFlags.SINGLE_VNODE:
+                container.appendChild(nextVNode.children.el)
+                break
+            case ChildrenFlags.NO_CHILDREN:
+                break
+            default:
+                nextVNode.children.forEach(item => {
+                    container.appendChild(item.el)
+                })
+                break
+        }
+    }
 }
 
 export function patch (prevVNode, nextVNode, container)  {
