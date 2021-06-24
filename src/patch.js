@@ -121,12 +121,55 @@ const patchChildren = (prevChildFlags, nextChildFlags, prevChildren, nextChildre
                     break;
                 default:
                     // 核心diff算法
-                    prevChildren.forEach(item => {
-                        removeVNode(item, container)
-                    })
-                    nextChildren.forEach(item => {
-                        mount(item, container)
-                    })
+                    const prevLen = prevChildren.length
+                    const nextLen = nextChildren.length
+                    const commonLen = Math.min(prevLen, nextLen)
+
+                    // for (let i = 0; i < commonLen; i++) {
+                    //     patch(prevChildren[i], nextChildren[i], container)
+                    // }
+
+                    // // 多出的元素直接添加进去
+                    // if (nextLen > prevLen) {
+                    //     for (let i = commonLen; i < nextLen; i ++) {
+                    //         mount(nextChildren[i], container)
+                    //     }
+                    // } else if (prevLen > nextLen) {
+                    //     for (let i = commonLen; i < prevLen; i ++) {
+                    //         removeVNode(prevChildren[i], container)
+                    //     }
+                    // }
+
+                    // 用来存储寻找过程中遇到的最大索引值
+                    let lastIndex = 0
+
+                    for (let i = 0; i < nextChildren.length; i++ ) {
+                        const nextVNode = nextChildren[i]
+                        let find = false
+
+                        for (let j = 0;  j < prevChildren.length; j++) {
+                            const prevVNode = prevChildren[j]
+                            if (nextVNode.key === prevVNode.key) {
+                                find = true
+                                patch(prevVNode, nextVNode, container)
+
+                                if (j < lastIndex) {
+                                    // 需要移动
+                                    const refNode = nextChildren[i-1].el.nextSibling
+                                    // 通过insertBefore 移动 dom
+                                    container.insertBefore(nextVNode.el, refNode)
+                                } else {
+                                    lastIndex = j
+                                }
+                                break;
+                            }
+                        }
+
+                        if (!find) {
+                            mount(nextVNode, container, false)
+                        }
+                    }
+
                     break
             }
             break

@@ -116,6 +116,7 @@ export const h = (tag, data = null, children = null) => {
         flags,
         tag,
         data,
+        key: data && data.key ? data.key : null,
         children,
         childFlags,
         el: null
