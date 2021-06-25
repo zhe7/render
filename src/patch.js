@@ -121,52 +121,131 @@ const patchChildren = (prevChildFlags, nextChildFlags, prevChildren, nextChildre
                     break;
                 default:
                     // 核心diff算法
-                    const prevLen = prevChildren.length
-                    const nextLen = nextChildren.length
-                    const commonLen = Math.min(prevLen, nextLen)
 
-                    // for (let i = 0; i < commonLen; i++) {
-                    //     patch(prevChildren[i], nextChildren[i], container)
-                    // }
-
-                    // // 多出的元素直接添加进去
-                    // if (nextLen > prevLen) {
-                    //     for (let i = commonLen; i < nextLen; i ++) {
-                    //         mount(nextChildren[i], container)
-                    //     }
-                    // } else if (prevLen > nextLen) {
-                    //     for (let i = commonLen; i < prevLen; i ++) {
-                    //         removeVNode(prevChildren[i], container)
-                    //     }
-                    // }
-
+                    // react diff算法
                     // 用来存储寻找过程中遇到的最大索引值
-                    let lastIndex = 0
+                    // let lastIndex = 0
 
-                    for (let i = 0; i < nextChildren.length; i++ ) {
-                        const nextVNode = nextChildren[i]
-                        let find = false
+                    // for (let i = 0; i < nextChildren.length; i++ ) {
+                    //     const nextVNode = nextChildren[i]
+                    //     let find = false
 
-                        for (let j = 0;  j < prevChildren.length; j++) {
-                            const prevVNode = prevChildren[j]
-                            if (nextVNode.key === prevVNode.key) {
-                                find = true
-                                patch(prevVNode, nextVNode, container)
+                    //     for (let j = 0;  j < prevChildren.length; j++) {
+                    //         const prevVNode = prevChildren[j]
+                    //         if (nextVNode.key === prevVNode.key) {
+                    //             find = true
+                    //             patch(prevVNode, nextVNode, container)
 
-                                if (j < lastIndex) {
-                                    // 需要移动
-                                    const refNode = nextChildren[i-1].el.nextSibling
-                                    // 通过insertBefore 移动 dom
-                                    container.insertBefore(nextVNode.el, refNode)
-                                } else {
-                                    lastIndex = j
-                                }
-                                break;
+                    //             if (j < lastIndex) {
+                    //                 // 需要移动
+                    //                 const refNode = nextChildren[i-1].el.nextSibling
+                    //                 // 通过insertBefore 移动 dom
+                    //                 container.insertBefore(nextVNode.el, refNode)
+                    //             } else {
+                    //                 lastIndex = j
+                    //             }
+                    //             break;
+                    //         }
+                    //     }
+
+                    //     if (!find) {
+                    //         const refNode = i === 0 ? prevChildren[0].el : nextChildren[i-1].el.nextSibling
+                    //         mount(nextVNode, container, false, refNode)
+                    //     }
+                    // }
+
+                    // prevChildren.forEach(item => {
+                    //     if (!nextChildren.some(next => next.key === item.key)) {
+                    //         removeVNode(item, container)
+                    //     }
+                    // })
+
+                    // diff 算法：双端比较法，vue2.x采用的
+                    let oldStartIdx = 0
+                    let oldEndIdx = prevChildren.length - 1
+                    let newStartIdx = 0
+                    let newEndIdx = nextChildren.length - 1
+
+                    let oldStartVNode = prevChildren[oldStartIdx]
+                    let oldEndVNode = prevChildren[oldEndIdx]
+                    let newStartVNode = nextChildren[newStartIdx]
+                    let newEndVNode = nextChildren[newEndIdx]
+
+                    while(oldStartIdx <= oldEndIdx && newStartIdx <= newEndIdx ) {
+                        if (!oldStartVNode) {
+                            // 如果不存在这个节点，说明此节点是被移动过，为undefined
+                            // 所以向后位移一位
+                            oldStartVNode = prevChildren[++oldStartIdx]
+                        } else if (!oldEndVNode) {
+                            // 如果不存在这个节点，说明此节点是被移动过，为undefined
+                            // 所以向前位移一位
+                            oldEndVNode = prevChildren[--oldEndIdx]
+                        } else if (oldStartVNode.key === newStartVNode.key) {
+                            console.log(1)
+                            patch(oldStartVNode, newStartVNode, container)
+
+                            // 更新索引
+                            oldStartVNode = prevChildren[++oldStartIdx]
+                            newStartVNode = nextChildren[++newStartIdx]
+
+                        } else if (oldEndVNode.key === newEndVNode.key) {
+                            console.log(2)
+                            patch(oldEndVNode, newEndVNode, container)
+
+                            // 更新索引
+                            oldEndVNode = prevChildren[--oldEndIdx]
+                            newEndVNode = nextChildren[--newEndIdx]
+
+                        } else if (oldStartVNode.key === newEndVNode.key) {
+                            console.log(3)
+
+                            patch(oldStartVNode, newEndVNode, container)
+
+                            container.insertBefore(oldStartVNode.el, oldEndVNode.el.nextSibling)
+
+                            // 更新索引
+                            oldStartVNode = prevChildren[++oldStartIdx]
+                            newEndVNode = nextChildren[--newEndIdx]
+
+                        } else if (oldEndVNode.key === newStartVNode.key) {
+                            console.log(4)
+                            // 先patch更新节点
+                            patch(oldEndVNode, newStartVNode, container)
+                            // 把old的最后一个节点更新到第一个
+                            container.insertBefore(oldEndVNode.el, oldStartVNode.el)
+
+                            // 更新索引
+                            oldEndVNode = prevChildren[--oldEndIdx]
+                            newStartVNode = nextChildren[++newStartIdx]
+                        } else {
+                            // 如果双端都匹配不上
+                            // 遍历旧的children, 找到与newStartVNode key相等的节点，将此节点的dom 移动到最前面
+                            const idxInOld = prevChildren.findIndex(item => item.key === newStartVNode.key)
+                            if (idxInOld >= 0) {
+                                const vnodeToMove = prevChildren[idxInOld]
+                                patch(vnodeToMove, newStartVNode, container)
+                                // 移动到最前面
+                                container.insertBefore(vnodeToMove.el, oldStartVNode.el)
+                                // 由于旧children中该位置的节点所对应的真实dom已经被移动，所以将其设置为undefined
+                                prevChildren[idxInOld] = undefined
+                            } else {
+                                // 如果没找到，则认定为新增
+                                mount(newStartVNode, container, false, oldStartVNode.el)
                             }
+                            // 将newStartIdx 下移一位
+                            newStartVNode = nextChildren[++newStartIdx]
                         }
+                    }
 
-                        if (!find) {
-                            mount(nextVNode, container, false)
+                    if (oldEndIdx < oldStartIdx) {
+                        // 添加新节点
+                        for(let i = newStartIdx; i <= newEndIdx; i++) {
+                            mount(nextChildren[i], container, false , oldStartVNode.el)
+                        }
+                    } else if (newEndIdx < newStartIdx ) {
+                        // 移除old节点
+                        for (let i = oldStartIdx; i <= oldEndIdx; i++) {
+                            removeVNode(prevChildren[i], container)
                         }
                     }
 

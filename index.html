@@ -390,15 +390,17 @@
         // render(h(Parent), container)
 
         const prev = h('ul', null, [
+            h('li', { key: 5 }, 5),
             h('li', { key: 1 }, 1),
             h('li', { key: 2 }, 2),
-            h('li', { key: 3 }, 3)
+            h('li', { key: 3 }, 3),
+            h('li', { key: 4 }, 4)
         ])
 
         const next = h('ul', null, [
-            h('li', { key: 3 }, 3),
-            h('li', { key: 1 }, 1),
+            h('li', { key: 4 }, 4),
             h('li', { key: 2 }, 2),
+            h('li', { key: 3 }, 3)
         ])
 
         render(prev, container)

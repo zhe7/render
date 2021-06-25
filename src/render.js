@@ -3,7 +3,7 @@ import { createTextVNode } from './h.js'
 import { patch, patchData, getElement } from './patch.js'
 
 
-const mountElement = (vnode, container, isSVG) => {
+const mountElement = (vnode, container, isSVG, refNode) => {
     container = getElement(container)
     isSVG = isSVG || vnode.flags & VNodeFlags.ELEMENT_SVG
     const el = isSVG
@@ -33,7 +33,7 @@ const mountElement = (vnode, container, isSVG) => {
 
 
     vnode.el = el
-    container.appendChild(el)
+    refNode ? container.insertBefore(el, refNode) : container.appendChild(el)
 }
 
 // 有状态组件
@@ -173,12 +173,12 @@ const mountPortal = (vnode, container) => {
 }
 
 
-export const mount = (vnode, container, isSVG) => {
+export const mount = (vnode, container, isSVG, refNode) => {
     const { flags } = vnode
     container = getElement(container)
     if (flags & VNodeFlags.ELEMENT) {
         // 挂载普通元素
-        mountElement(vnode, container, isSVG)
+        mountElement(vnode, container, isSVG, refNode)
     } else if (flags & VNodeFlags.COMPONENT) {
         // 挂载组件
         mountComponent(vnode, container, isSVG)
